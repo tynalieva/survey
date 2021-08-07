@@ -10,6 +10,7 @@ from django.utils.encoding import force_bytes, force_text, DjangoUnicodeDecodeEr
 from .utils import generate_token
 from django.core.mail import EmailMessage
 from django.conf import settings
+from django.contrib.auth import authenticate, login, logout
 
 
 class RegistrationView(View):
@@ -87,20 +88,60 @@ class LoginView(View):
     def get(self, request):
         return render(request, 'auth/login.html')
 
+    def post(self, request):
+        context = {
+            'data': request.POST,
+            'error_data': False
+        }
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        if username == '':
+            messages.add_message(request, messages.ERROR, 'Username is required')
+            context['error_data'] = True
+        if password == '':
+            messages.add_message(request, messages.ERROR, 'Password is required')
+            context['error_data'] = True
+
+        user = authenticate(request, username=username, password=password)
+
+        if not user and not context['error_data']:
+            messages.add_message(request, messages.ERROR, 'Invalid login')
+            context['error_data'] = True
+
+        if context['error_data']:
+            return render(request, 'auth/login.html', status=401, context=context)
+
+        login(request, user)
+        return redirect('home')
+
 
 class ActivateView(View):
     def get(self, request, uidb64, token):
-        global user
+
         try:
             uid = force_text(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
+
         except Exception as identifier:
             user = None
 
         if user is not None and generate_token.check_token(user, token):
-            user.is_activate = True
+            user.is_active = True
             user.save()
             messages.add_message(request, messages.INFO, 'Your account has been activated successfully')
             return redirect('login')
 
         return render(request, 'auth/activate_error.html', status=401)
+
+
+class HomeView(View):
+    def get(self, request):
+        return render(request, 'home.html')
+
+
+class LogoutView(View):
+    def post(self, request):
+        logout(request)
+        messages.add_message(request, messages.SUCCESS, 'Your has been logout successfully')
+        return redirect('login')
