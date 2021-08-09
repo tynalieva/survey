@@ -24,7 +24,7 @@
 									</div>
 								</header>
 								<a href="{% url 'post_detail' post.id %}" class="image featured"><img src="{{ post.get_image }}" alt="{{ post.image.url }}" /></a>
-								<p class="LOPO">{{ post.description }}</p>
+								<p>{{ post.description }}</p>
 								<footer>
 									<ul class="actions">
 										<li><a href="{% url 'post_detail' post.id %}" class="button large">Continue Reading</a></li>
