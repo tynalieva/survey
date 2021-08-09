@@ -83,11 +83,25 @@
 							</section>
 
 						<!-- Actions -->
+
+
 							<section>
 								<ul class="actions stacked">
-									<li><a href="#" class="button large fit">Log In</a></li>
+									{% if not user.is_authenticated %}
+									<li><a href="{% url 'login' %}" class="button fit">Log In</a></li>
+									{% endif %}
 								</ul>
-							</section>
+
+
+
+
+								<form action="{% url 'logout' %}" method="post">
+									{% if user.is_authenticated %}
+								{% csrf_token %}
+								<input type="submit" value="logout" class="button fit">
+									{% endif %}
+							</form>
+								</section>
 
 					</section>
 
