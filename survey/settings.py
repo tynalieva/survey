@@ -154,3 +154,6 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_URL = 'logout'
 LOGOUT_REDIRECT_URL = 'login'
+
+# REDIS_HOST = 'localhost'
+# REDIS_PORT = 6379

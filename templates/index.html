@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-{% if messages %}
 
+{% if messages %}
 <ul class="messages">
     {% for message in messages %}
     <div class="alert alert-success" role="alert">{{ message }}</div>
     {% endfor %}
 </ul>
-	{% endif %}
+{% endif %}
 
 						<!-- Post -->
 							{% for post in posts %}
 							<article class="post">
 								<header>
 									<div class="title">
-										<h2><a href="single.html">{{ post.title }}</a></h2>
+										<h2><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a></h2>
 										<p>{{ post.region }}</p>
 									</div>
 									<div class="meta">
@@ -23,11 +23,11 @@
 										<a href="#" class="author"><span class="name">{{ post.owner }}</span><img src="images/avatar.jpg" alt="" /></a>
 									</div>
 								</header>
-								<a href="single.html" class="image featured"><img src="{{ post.get_image }}" alt="{{ post.image.url }}" /></a>
-								<p>{{ post.description }}</p>
+								<a href="{% url 'post_detail' post.id %}" class="image featured"><img src="{{ post.get_image }}" alt="{{ post.image.url }}" /></a>
+								<p class="LOPO">{{ post.description }}</p>
 								<footer>
 									<ul class="actions">
-										<li><a href={{ 'post_detail.html' class="button large">Continue Reading</a></li>
+										<li><a href="{% url 'post_detail' post.id %}" class="button large">Continue Reading</a></li>
 									</ul>
 									<ul class="stats">
 										<li><a href="#">General</a></li>
@@ -37,4 +37,15 @@
 								</footer>
 							</article>
 							{% endfor %}
+
+<!-- Pagination -->
+							<ul class="actions pagination">
+								{% if page_obj.has_previous %}
+								<li><a href="{% url 'home' %}?page={{ page_obj.previous_page_number }}" class="button large previous">Previous Page</a></li>
+								{% endif %}
+								{% if page_obj.has_next %}
+								<li><a href="{% url 'home' %}?page={{ page_obj.next_page_number }}" class="button large next">Next Page</a></li>
+								{% endif %}
+							</ul>
+
 {% endblock %}

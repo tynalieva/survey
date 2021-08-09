@@ -1,27 +1,77 @@
+from datetime import timedelta
+
 from django.contrib import messages
+from django.db.models import Q
 from django.forms import modelformset_factory
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import generic
+
 from .forms import *
 from .models import *
 
 
-def index(request):
-    # posts = Post.objects.all()
-    return render(request, 'index.html')
+class HomePageView(generic.ListView):
+    model = Post
+    template_name = 'index.html'
+    context_object_name = 'posts'
+    paginate_by = 2
+
+    def get_template_names(self):
+        template_name = super(HomePageView, self).get_template_names()
+        search = self.request.GET.get('query')
+        if search:
+            template_name = 'search.html'
+        return template_name
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        search = self.request.GET.get('query')
+        filter = self.request.GET.get('filter')
 
 
-def category_detail(request, slug):
-    category = Category.objects.get(slug=slug)
-    posts = Post.objects.filter(category_id=slug)
-    return render(request, 'post/category_detail.html', locals())
+        if search:
+            context['posts'] = Post.objects.filter(Q(title__icontains=search)|
+                                                   Q(description__icontains=search))
+
+        elif filter == 'new':
+            start_date = timezone.now() - timedelta(days=2)
+            context['posts'] = Post.objects.filter(created_at__gte=start_date)
+
+        else:
+            context['post'] = Post.objects.all()
+
+        return context
 
 
-def post_detail(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    image = post.get_image
-    images = post.images.exclude(id=image.id)
-    return render(request, 'post/post_detail.html', locals())
+class CategoryDetailView(generic.DetailView):
+    model = Category
+    template_name = 'post/category_detail.html'
+    context_object_name = 'category'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.slug = kwargs.get('slug', None)
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['posts'] = Post.objects.filter(category_id=self.slug)
+        return context
+
+
+class PostDetailView(generic.DetailView):
+    model = Post
+    template_name = 'post/post_detail.html'
+    context_object_name = 'post'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        image = self.get_object().get_image
+        context['images'] = self.get_object().images.exclude(id=image.id)
+        return context
 
 
 def post_create(request):
@@ -62,30 +112,14 @@ def post_update(request, pk):
     return render(request, 'post/post_update.html', locals())
 
 
-def post_delete(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == 'POST':
-        post.delete()
+class PostDeleteView(generic.DeleteView):
+    model = Post
+    template_name = 'post/post_delete.html'
+    success_url = reverse_lazy('home')
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.delete()
         messages.add_message(request, messages.INFO, 'Successfully deleted')
-        return redirect('home')
-    return render(request, 'post/post_delete.html')
-
-
-class CreatePostView(generic.CreateView):
-    queryset = Post.objects.all()
-    form_class = PostForm
-    template_name = 'main/create_post.html'
-
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
-
-# class CreatePostView(generic.CreateView):
-#     queryset = Post.objects.all()
-#     form_class = PostForm
-#     template_name = 'main/post_create.html'
-#
-#     def form_valid(self, form):
-#         form.instance.owner = self.request.user3
-#         return super().form_valid(form)
-
+        return HttpResponseRedirect(success_url)
