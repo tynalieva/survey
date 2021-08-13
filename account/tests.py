@@ -20,7 +20,7 @@ class RegisterTest(BaseTest):
     def test_can_view_page_correctly(self):
         response = self.client.get(self.register_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'auth/register.html')
+        self.assertTemplateUsed(response, 'auth/registration.html')
 
     # def test_can_register_user(self):
     #     response = self.post(self.register_url, self.user, format='text/html')

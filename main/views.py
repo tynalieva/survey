@@ -1,9 +1,10 @@
 from datetime import timedelta
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.forms import modelformset_factory
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -11,6 +12,7 @@ from django.views import generic
 
 from .forms import *
 from .models import *
+from .permissions import UserPermissionsMixin
 
 
 class HomePageView(generic.ListView):
@@ -70,10 +72,27 @@ class PostDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         image = self.get_object().get_image
+        stuff = get_object_or_404(Post, id=self.kwargs['pk'])
+        total_likes = stuff.total_likes()
+
+        liked = False
+
+        try:
+            stuff.like.filter(email=self.request.user.email)
+            if stuff.like.filter(email=self.request.user.email).exists():
+                liked = True
+            else:
+                liked = False
+        except Exception as identifier:
+            liked = False
+
         context['images'] = self.get_object().images.exclude(id=image.id)
+        context['total_likes'] = total_likes
+        context['liked'] = liked
         return context
 
 
+@login_required(login_url='login')
 def post_create(request):
     ImageFormSet = modelformset_factory(Image, form=ImageForm, max_num=3)
 
@@ -81,12 +100,21 @@ def post_create(request):
         post_form = PostForm(request.POST)
         formset = ImageFormSet(request.POST, request.FILES, queryset=Image.objects.none())
         if post_form.is_valid() and formset.is_valid():
-            post = post_form.save()
+            post = post_form.save(commit=False)
+            post.owner = request.user
+            post.save()
 
             for form in formset.cleaned_data:
-                image = form['image']
-                Image.objects.create(image=image, post=post)
-            return redirect(post.get_absolute_url())
+                try:
+                    image = form['image']
+                    Image.objects.create(image=image, post=post)
+                    return redirect(post.get_absolute_url())
+                except Exception as identifier:
+                    image = None
+                    messages.info(request, "Image is required")
+                    return redirect('post_create')
+
+
     else:
         post_form = PostForm()
         formset = ImageFormSet(queryset=Image.objects.none())
@@ -96,23 +124,27 @@ def post_create(request):
 
 def post_update(request, pk):
     post = get_object_or_404(Post, pk=pk)
-    ImageFormSet = modelformset_factory(Image, form=ImageForm, max_num=3)
-    post_form = PostForm(request.POST or None, instance=post)
-    formset = ImageFormSet(request.POST or None, request.FILES or None, queryset=Image.objects.filter(post=post))
+    if request.user == post.owner:
+        ImageFormSet = modelformset_factory(Image, form=ImageForm, max_num=3)
+        post_form = PostForm(request.POST or None, instance=post)
+        formset = ImageFormSet(request.POST or None, request.FILES or None, queryset=Image.objects.filter(post=post))
 
-    if post_form.is_valid() and formset.is_valid():
-        post = post_form.save()
+        if post_form.is_valid() and formset.is_valid():
+            post = post_form.save()
 
-        for form in formset:
-            image = form.save(commit=False)
-            image.post = post
-            image.save()
-        return redirect(post.get_absolute_url())
+            for form in formset:
+                image = form.save(commit=False)
+                image.post = post
+                image.save()
+            return redirect(post.get_absolute_url())
 
-    return render(request, 'post/post_update.html', locals())
+        return render(request, 'post/post_update.html', locals())
+    else:
+        messages.add_message(request, messages.INFO, "Only post owner can update POST!")
+        return redirect('home')
 
 
-class PostDeleteView(generic.DeleteView):
+class PostDeleteView(UserPermissionsMixin, generic.DeleteView):
     model = Post
     template_name = 'post/post_delete.html'
     success_url = reverse_lazy('home')
@@ -123,3 +155,30 @@ class PostDeleteView(generic.DeleteView):
         self.object.delete()
         messages.add_message(request, messages.INFO, 'Successfully deleted')
         return HttpResponseRedirect(success_url)
+
+
+def like(request, pk):
+    post = get_object_or_404(Post, id=request.POST.get('post_id'))
+    liked = False
+    print(post.like)
+    if post.like.filter(email=request.user.email).exists():
+        post.like.remove(request.user)
+        liked = False
+    else:
+        post.like.add(request.user)
+        liked = True
+    return HttpResponseRedirect(reverse('post_detail', args=[str(pk)]))
+
+
+class CommentCreateView(generic.CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'post/comment_create.html'
+    success_url = reverse_lazy('home')
+
+    def form_valid(self, form):
+        form.instance.post_id = self.kwargs['pk']
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+
