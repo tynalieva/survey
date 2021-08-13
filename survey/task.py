@@ -1,1 +1,0 @@
-app.autodiscover_tasks()

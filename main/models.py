@@ -1,6 +1,8 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
+
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -38,6 +40,7 @@ class Post(models.Model):
     address = models.CharField(max_length=255)
     owner = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    like = models.ManyToManyField(User, related_name='post')
 
     class Meta:
         ordering = ('created_at', )
@@ -47,6 +50,9 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse('post_detail', kwargs={'pk': self.pk})
+
+    def total_likes(self):
+        return self.like.count()
 
     @property
     def get_image(self):
@@ -90,18 +96,6 @@ class Rating(models.Model):
         unique_together = ['owner', 'post']
         verbose_name = 'Рейтинг'
         verbose_name_plural = 'Рейтинги'
-
-
-class Like(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes')
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
-    likes = models.BooleanField(default=False)
-
-    class Meta:
-        unique_together = ['owner', 'post']
-
-    def str(self):
-        return f'{self.owner} liked this ad: {self.likes}'
 
 
 class Favorites(models.Model):

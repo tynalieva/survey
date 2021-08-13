@@ -4,7 +4,7 @@
 
 				<!-- Main -->
 					<div id="main">
-
+						{% if user.is_authenticated %}
 						<!-- Post -->
 							<article class="post">
 								<header>
@@ -14,7 +14,7 @@
 									</div>
 									<div class="meta">
 										<time class="published" datetime="2015-11-01">{{ post.created_at }}</time>
-										<a href="#" class="author"><span class="name">{{ post.owner }}</span><img src="images/avatar.jpg" alt="" /></a>
+										<a href="#" class="author"><span class="name">{{ post.owner.username }}</span><img src="images/avatar.jpg" alt="" /></a>
 									</div>
 								</header>
 								<span class="image featured"><img src="{{ post.get_image }}" alt="" /></span>
@@ -22,16 +22,53 @@
 								<img src="{{ image }}" class="img" alt="..." style="width:462px; heigth:200px!important;">
 								{% endfor %}
 
-								<p>{{ post.description }}</p>
 								<footer>
 									<ul class="stats">
 										<li><a href="{% url 'post_update' post.id %}">Update</a></li>
 										<li><a href="{% url 'post_delete' post.id %}">Delete</a></li>
-										<li><a href="#" class="icon solid fa-heart">28</a></li>
+										<li class="icon solid fa-heart"> {{ total_likes }}</li>
 										<li><a href="#" class="icon solid fa-comment">128</a></li>
 									</ul>
 								</footer>
+
+									<form action="{% url 'like_post' post.pk %}" method="post">
+										{% csrf_token %}
+
+										{% if liked %}
+										<button type="submit" name="post_id" value="{{ post.id }}">
+											Unlike </button>
+										{% else %}
+										<button type="submit" name="post_id" value="{{ post.id }}" class="icon solid fa-heart">
+											Like </button>
+										{% endif %}
+									</form>
+
+
+
+
+								<p>{{ post.description }}</p>
+
+<hr/>
+								{% if not post.comments.all %}
+									No comments yet..
+									<a href="{% url 'comment_create' post.pk %}">Add one</a>
+								{% else %}
+									{% for comment in post.comments.all %}
+								<span>
+									<strong>{{ comment.owner.username }} - {{ comment.created_at }}</strong><br/>
+									{{ comment.body }}<br/>
+								</span>
+									{% endfor %}
+								<br/>
+								<a href="{% url 'comment_create' post.pk %}">Add new comment</a>
+								{% endif %}
+
 							</article>
+						{% endif %}
+
+						{% if not user.is_authenticated %}
+							<h3>Please, login to see more</h3>
+						{% endif %}
 
 					</div>
 

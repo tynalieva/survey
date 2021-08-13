@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="row">
+
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+
+                <div class="card mt-5">
+                    <img src="{% static 'img/m.jpg' %}" width="100%" height="auto" class="card-img-top" alt="...">
+
+                    <div class="card-body">
+
+<p>Your account has been successfully activated!</p>
+
+
+                         </div>
+                </div>
+
+                <div class="card mt-2">
+                    <div class="card-body">
+                        <p>
+                            Login <a href="{% url 'login' %}">Link</a>
+                        </p>
+
+
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+
+    </div>
+    <div class="col-md-3"></div>
+
+</div>
+
+{% endblock %}

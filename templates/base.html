@@ -16,8 +16,17 @@
 						<h1><a href="{% url 'home' %}">Home</a></h1>
 						<nav class="links">
 							<ul>
-								<li><a href="{% url 'home' %}">some</a></li>
-								<li><a href="#">Adipiscing</a></li>
+								{% if user.is_authenticated %}
+								<li><a href="{% url 'profile' %}">My Profile</a></li>
+								{% endif %}
+
+								{% if user.is_authenticated %}
+								<li><a href="{% url 'logout' %}">Log Out</a></li>
+								{% endif %}
+
+								{% if not user.is_authenticated %}
+								<li><a href="{% url 'login' %}">Log In</a></li>
+								{% endif %}
 							</ul>
 						</nav>
 						<nav class="main">
@@ -92,7 +101,18 @@
 									{% endif %}
 								</ul>
 
+								<ul class="actions stacked">
+									{% if user.is_authenticated %}
+									<li><a href="{% url 'profile' %}" class="button fit">My profile</a></li>
+									{% endif %}
+								</ul>
 
+								<form action="{% url 'change_password' %}" method="post">
+									{% if user.is_authenticated %}
+									{% csrf_token %}
+									<input type="submit" value="change password" class="button fit">
+										{% endif %}
+								</form>
 
 
 								<form action="{% url 'logout' %}" method="post">
@@ -120,7 +140,7 @@
 
 						<!-- Intro -->
 							<section id="intro">
-								<a href="#" class="logo"><img src="images/logo.jpg" alt="" /></a>
+								<a href="#" class="logo"><img src="#" alt="" /></a>
 								<header>
 									<h2>Time to travel</h2>
 									<p>Let's travel with us<a href=""></a></p>
@@ -136,9 +156,9 @@
 											<header>
 												<h3><a href="single.html">Vitae sed condimentum</a></h3>
 												<time class="published" datetime="2015-10-20">October 20, 2015</time>
-												<a href="#" class="author"><img src="images/avatar.jpg" alt="" /></a>
+												<a href="#" class="author"><img src="#" alt="" /></a>
 											</header>
-											<a href="single.html" class="image"><img src="images/pic04.jpg" alt="" /></a>
+											<a href="single.html" class="image"><img src="#" alt="" /></a>
 										</article>
 
 									<!-- Mini Post -->
@@ -146,9 +166,9 @@
 											<header>
 												<h3><a href="single.html">Rutrum neque accumsan</a></h3>
 												<time class="published" datetime="2015-10-19">October 19, 2015</time>
-												<a href="#" class="author"><img src="images/avatar.jpg" alt="" /></a>
+												<a href="#" class="author"><img src="#" alt="" /></a>
 											</header>
-											<a href="single.html" class="image"><img src="images/pic05.jpg" alt="" /></a>
+											<a href="single.html" class="image"><img src="#" alt="" /></a>
 										</article>
 
 									<!-- Mini Post -->
@@ -156,9 +176,9 @@
 											<header>
 												<h3><a href="single.html">Odio congue mattis</a></h3>
 												<time class="published" datetime="2015-10-18">October 18, 2015</time>
-												<a href="#" class="author"><img src="images/avatar.jpg" alt="" /></a>
+												<a href="#" class="author"><img src="#" alt="" /></a>
 											</header>
-											<a href="single.html" class="image"><img src="images/pic06.jpg" alt="" /></a>
+											<a href="single.html" class="image"><img src="#" alt="" /></a>
 										</article>
 
 									<!-- Mini Post -->
@@ -166,9 +186,9 @@
 											<header>
 												<h3><a href="single.html">Enim nisl veroeros</a></h3>
 												<time class="published" datetime="2015-10-17">October 17, 2015</time>
-												<a href="#" class="author"><img src="images/avatar.jpg" alt="" /></a>
+												<a href="#" class="author"><img src="#" alt="" /></a>
 											</header>
-											<a href="single.html" class="image"><img src="images/pic07.jpg" alt="" /></a>
+											<a href="single.html" class="image"><img src="#" alt="" /></a>
 										</article>
 
 								</div>
@@ -183,45 +203,30 @@
 												<h3><a href="single.html">Lorem ipsum fermentum ut nisl vitae</a></h3>
 												<time class="published" datetime="2015-10-20">October 20, 2015</time>
 											</header>
-											<a href="single.html" class="image"><img src="images/pic08.jpg" alt="" /></a>
+											<a href="single.html" class="image"><img src="#" alt="" /></a>
 										</article>
 									</li>
-									<li>
-										<article>
-											<header>
-												<h3><a href="single.html">Convallis maximus nisl mattis nunc id lorem</a></h3>
-												<time class="published" datetime="2015-10-15">October 15, 2015</time>
-											</header>
-											<a href="single.html" class="image"><img src="images/pic09.jpg" alt="" /></a>
-										</article>
-									</li>
+
 									<li>
 										<article>
 											<header>
 												<h3><a href="single.html">Euismod amet placerat vivamus porttitor</a></h3>
 												<time class="published" datetime="2015-10-10">October 10, 2015</time>
 											</header>
-											<a href="single.html" class="image"><img src="images/pic10.jpg" alt="" /></a>
+											<a href="single.html" class="image"><img src="#" alt="" /></a>
 										</article>
 									</li>
-									<li>
-										<article>
-											<header>
-												<h3><a href="single.html">Magna enim accumsan tortor cursus ultricies</a></h3>
-												<time class="published" datetime="2015-10-08">October 8, 2015</time>
-											</header>
-											<a href="single.html" class="image"><img src="images/pic11.jpg" alt="" /></a>
-										</article>
-									</li>
+
 									<li>
 										<article>
 											<header>
 												<h3><a href="single.html">Congue ullam corper lorem ipsum dolor</a></h3>
 												<time class="published" datetime="2015-10-06">October 7, 2015</time>
 											</header>
-											<a href="single.html" class="image"><img src="images/pic12.jpg" alt="" /></a>
+											<a href="single.html" class="image"><img src="#" alt="" /></a>
 										</article>
 									</li>
+
 								</ul>
 							</section>
 
