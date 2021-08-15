@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<section>
+	<h3>Delete this Comment?</h3>
+	<form method="post">
+		{% csrf_token %}
+		<input type="submit" value="Yes"/>
+		<a href="{% url 'home' post.id %}" class="button" type="submit">Cancel</a>
+	</form>
+</section>
+
+{% endblock %}

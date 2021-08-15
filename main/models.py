@@ -1,3 +1,4 @@
+from django import template
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
@@ -9,6 +10,7 @@ class Category(models.Model):
     slug = models.SlugField(primary_key=True, max_length=255)
     name = models.CharField(max_length=255)
     image = models.ImageField(upload_to='categories', blank=True, null=True)
+    description = models.TextField()
     parent = models.ForeignKey('self', related_name='children', blank=True, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -21,6 +23,9 @@ class Category(models.Model):
         if self.children:
             return self.children.all()
         return False
+
+    def total_posts(self):
+        return self.posts.count()
 
 
 class Post(models.Model):
@@ -58,13 +63,21 @@ class Post(models.Model):
     def get_image(self):
         return self.images.first()
 
+    def total_comments(self):
+        return self.comments.count()
+
+    def total_post(self):
+        return self.owner.count()
+
 
 class Image(models.Model):
-    image = models.ImageField(upload_to='images/')
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='images/', blank=True, null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="images")
 
     def __str__(self):
-        return self.image.url
+        if self.image:
+            return self.image.url
+        return ' '
 
 
 class Comment(models.Model):

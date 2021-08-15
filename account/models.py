@@ -30,7 +30,7 @@ class CustomUser(AbstractBaseUser):
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     full_name = models.CharField(max_length=50, blank=True)
-    image = models.ImageField(default='g.jpg', upload_to='profile')
+    image = models.ImageField(default='pr.jpg', upload_to='profile')
     activation_code = models.CharField(max_length=255, blank=True)
 
     USERNAME_FIELD = 'email'
