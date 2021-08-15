@@ -1,7 +1,9 @@
 from datetime import timedelta
 
+from django import template
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
 from django.forms import modelformset_factory
 from django.http import HttpResponseRedirect, HttpResponse
@@ -19,7 +21,7 @@ class HomePageView(generic.ListView):
     model = Post
     template_name = 'index.html'
     context_object_name = 'posts'
-    paginate_by = 2
+    paginate_by = 3
 
     def get_template_names(self):
         template_name = super(HomePageView, self).get_template_names()
@@ -102,11 +104,11 @@ def post_create(request):
         if post_form.is_valid() and formset.is_valid():
             post = post_form.save(commit=False)
             post.owner = request.user
-            post.save()
 
             for form in formset.cleaned_data:
                 try:
                     image = form['image']
+                    post.save()
                     Image.objects.create(image=image, post=post)
                     return redirect(post.get_absolute_url())
                 except Exception as identifier:
@@ -133,9 +135,9 @@ def post_update(request, pk):
             post = post_form.save()
 
             for form in formset:
-                image = form.save(commit=False)
-                image.post = post
-                image.save()
+                images = form.save(commit=False)
+                images.post = post
+                images.save()
             return redirect(post.get_absolute_url())
 
         return render(request, 'post/post_update.html', locals())

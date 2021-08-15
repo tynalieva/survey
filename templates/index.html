@@ -9,7 +9,18 @@
     {% endfor %}
 </ul>
 {% endif %}
+							<article class="post">
+								<header>
+									<div class="title">
+										<h2>Welcome to our site!</h2>
+										<h4 class="icon solid fa-heart"><a href="{% url 'login' %}">Login</a></h4>
+									</div>
+								</header>
+										<div></div>
+								<img src="{% static 'img/kgs.jpg' %}" width="100%" height="auto" class="card-img-top" alt="...">
+							</article>
 
+								<div id="main">
 						<!-- Post -->
 							{% for post in posts %}
 							<article class="post">
@@ -20,19 +31,18 @@
 									</div>
 									<div class="meta">
 										<time class="published" datetime="2015-10-25">{{ post.created_at }}</time>
-										<a href="#" class="author"><span class="name">{{ post.owner }}</span><img src="images/avatar.jpg" alt="" /></a>
+										<a href="#" class="author"><span class="name">{{ post.owner.full_name }}</span><img src="{{ post.owner.image.url }}" alt="" /></a>
 									</div>
 								</header>
 								<a href="{% url 'post_detail' post.id %}" class="image featured"><img src="{{ post.get_image }}" alt="{{ post.image.url }}" /></a>
-								<p>{{ post.description }}</p>
 								<footer>
 									<ul class="actions">
 										<li><a href="{% url 'post_detail' post.id %}" class="button large">Continue Reading</a></li>
 									</ul>
 									<ul class="stats">
 										<li><a href="#">General</a></li>
-										<li><a href="#" class="icon solid fa-heart">28</a></li>
-										<li><a href="#" class="icon solid fa-comment">128</a></li>
+										<li class="icon solid fa-heart"> {{ post.total_likes }}</li>
+										<li class="icon solid fa-comment"> {{ post.total_comments }}</li>
 									</ul>
 								</footer>
 							</article>
@@ -47,5 +57,6 @@
 								<li><a href="{% url 'home' %}?page={{ page_obj.next_page_number }}" class="button large next">Next Page</a></li>
 								{% endif %}
 							</ul>
+</div>
 
 {% endblock %}

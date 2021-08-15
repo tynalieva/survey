@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <title>{% block title %} {% endblock title%}</title>
 	<link rel="stylesheet" href="{% static 'css/main.css' %}">
+
 </head>
 <body>
 <!-- Wrapper -->
@@ -63,7 +64,7 @@
 										</a>
 									</li>
 									<li>
-										<h3 class="opener">Region</h3>
+										<h3 class="opener">Category</h3>
 										<ul>
 											{% for category in categories %}
 											<li><a href="{% url 'category' category.slug %}">{{ category }}</a></li>
@@ -73,21 +74,19 @@
 									<li>
 										<a href="{% url 'post_create' %}">
 											<h3>Add a new post</h3>
-											<p>Sed vitae justo condimentum</p>
 										</a>
 									</li>
 									<li>
 										<a href="{% url 'home' %}?filter=new">
 											<h3>See New Posts</h3>
-											<p>Phasellus sed ultricies mi congue</p>
 										</a>
 									</li>
 									<li>
 										<a href="#">
-											<h3>Etiam sed consequat</h3>
-											<p>Porta lectus amet ultricies</p>
+											<h3>Future Tours</h3>
 										</a>
 									</li>
+
 								</ul>
 							</section>
 
@@ -128,11 +127,11 @@
 				<!-- Main -->
 <div id="main">
 
-
 							{% block content %}
 
-                            {% endblock %}
 
+
+                            {% endblock %}
 </div>
 
 				<!-- Sidebar -->
@@ -149,94 +148,63 @@
 
 						<!-- Mini Posts -->
 							<section>
+								<p> Popular Posts in this page:</p>
+								{% for post in posts %}
+								{% if post.total_likes == 2 %}
+
+
 								<div class="mini-posts">
 
 									<!-- Mini Post -->
 										<article class="mini-post">
 											<header>
-												<h3><a href="single.html">Vitae sed condimentum</a></h3>
-												<time class="published" datetime="2015-10-20">October 20, 2015</time>
-												<a href="#" class="author"><img src="#" alt="" /></a>
+												<h3><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a></h3>
+												<p>{{ post.region }}</p>
+												<time class="published" datetime="2015-10-20">{{ post.created_at }}</time>
+												<a href="#" class="author"><img src="{{ post.owner.image.url }}" alt="" /></a>
 											</header>
-											<a href="single.html" class="image"><img src="#" alt="" /></a>
+											<a href="{% url 'post_detail' post.id %}" class="image"><img src="{{ post.get_image }}" alt="" /></a>
 										</article>
 
 									<!-- Mini Post -->
-										<article class="mini-post">
-											<header>
-												<h3><a href="single.html">Rutrum neque accumsan</a></h3>
-												<time class="published" datetime="2015-10-19">October 19, 2015</time>
-												<a href="#" class="author"><img src="#" alt="" /></a>
-											</header>
-											<a href="single.html" class="image"><img src="#" alt="" /></a>
-										</article>
-
-									<!-- Mini Post -->
-										<article class="mini-post">
-											<header>
-												<h3><a href="single.html">Odio congue mattis</a></h3>
-												<time class="published" datetime="2015-10-18">October 18, 2015</time>
-												<a href="#" class="author"><img src="#" alt="" /></a>
-											</header>
-											<a href="single.html" class="image"><img src="#" alt="" /></a>
-										</article>
-
-									<!-- Mini Post -->
-										<article class="mini-post">
-											<header>
-												<h3><a href="single.html">Enim nisl veroeros</a></h3>
-												<time class="published" datetime="2015-10-17">October 17, 2015</time>
-												<a href="#" class="author"><img src="#" alt="" /></a>
-											</header>
-											<a href="single.html" class="image"><img src="#" alt="" /></a>
-										</article>
-
 								</div>
+{% endif %}
+								{% endfor %}
+
+
+
 							</section>
 
 						<!-- Posts List -->
 							<section>
+								<p>Your Posts in this page:</p>
+								{% for post in posts %}
+								{% if post.owner == request.user %}
+
 								<ul class="posts">
 									<li>
 										<article>
 											<header>
-												<h3><a href="single.html">Lorem ipsum fermentum ut nisl vitae</a></h3>
-												<time class="published" datetime="2015-10-20">October 20, 2015</time>
+												<h3><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a></h3>
+												<time class="published" datetime="2015-10-20">{{ post.created_at }}</time>
 											</header>
-											<a href="single.html" class="image"><img src="#" alt="" /></a>
-										</article>
-									</li>
-
-									<li>
-										<article>
-											<header>
-												<h3><a href="single.html">Euismod amet placerat vivamus porttitor</a></h3>
-												<time class="published" datetime="2015-10-10">October 10, 2015</time>
-											</header>
-											<a href="single.html" class="image"><img src="#" alt="" /></a>
-										</article>
-									</li>
-
-									<li>
-										<article>
-											<header>
-												<h3><a href="single.html">Congue ullam corper lorem ipsum dolor</a></h3>
-												<time class="published" datetime="2015-10-06">October 7, 2015</time>
-											</header>
-											<a href="single.html" class="image"><img src="#" alt="" /></a>
+											<a href="{% url 'post_detail' post.id %}" class="image"><img src="{{ post.get_image }}" alt="" /></a>
 										</article>
 									</li>
 
 								</ul>
+								{% endif %}
+								{% endfor %}
+
 							</section>
 
 						<!-- About -->
 							<section class="blurb">
 								<h2>About</h2>
-								<p>Mauris neque quam, fermentum ut nisl vitae, convallis maximus nisl. Sed mattis nunc id lorem euismod amet placerat. Vivamus porttitor magna enim, ac accumsan tortor cursus at phasellus sed ultricies.</p>
-								<ul class="actions">
-									<li><a href="#" class="button">Learn More</a></li>
-								</ul>
+								<p>This is a blog about beautiful places in Kyrgyzstan where you can go to travel.
+									You can also register and share the places you have been to and tell other users about them.
+									Let's develop tourism in Kyrgyzstan together!</p>
+								<h2 class="icon solid fa-heart"><a href="{% url 'login' %}">Let's travel together</a></h2>
 							</section>
 
 						<!-- Footer -->
